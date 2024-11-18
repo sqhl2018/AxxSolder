@@ -47,21 +47,28 @@ uint8_t fw_version_patch =  2;
 //#define PID_TUNING
 DEBUG_VERBOSITY_t debugLevel = DEBUG_INFO;
 
-/* PID parameters */
-#define KP_NT115 		5
-#define KI_NT115 		3
-#define KD_NT115 		0.25
-#define MAX_I_NT115 	300
+/* Cartridge type specific PID parameters */
+#define KP_NT115 					5
+#define KI_NT115 					2
+#define KD_NT115 					0.3
+#define MAX_I_NT115 				300
 
-#define KP_T210 		8
-#define KI_T210 		4
-#define KD_T210 		0.25
-#define MAX_I_T210 		300
+#define KP_T210 					7
+#define KI_T210 					4
+#define KD_T210 					0.3
+#define MAX_I_T210 					300
 
-#define KP_T245 		8
-#define KI_T245 		3
-#define KD_T245 		0.5
-#define MAX_I_T245 		300
+#define KP_T245 					8
+#define KI_T245 					2
+#define KD_T245 					0.5
+#define MAX_I_T245 					300
+
+/* General PID parameters */
+#define PID_MAX_OUTPUT 500
+#define PID_UPDATE_INTERVAL 25
+#define PID_ADD_I_MIN_ERROR 75
+double PID_NEG_ERROR_I_MULT = 7;
+double PID_NEG_ERROR_I_BIAS = 1;
 
 /* Timing constants */
 uint32_t previous_millis_display = 0;
@@ -130,12 +137,6 @@ double PID_MAX_I_LIMIT_tuning = 0;
 
 /* Allow use of custom temperatue, used for tuning */
 uint8_t custom_temperature_on = 0;
-
-/* PID parameters */
-#define PID_MAX_OUTPUT 500
-#define PID_UPDATE_INTERVAL 25
-#define PID_ADD_I_MIN_ERROR 75
-#define PID_NEGATIVE_ERROR_I_GAIN_MULTIPLIER 10
 
 /* Buffer for UART print */
 char UART_buffer[40];
@@ -588,7 +589,7 @@ void left_align_double(char* str, double number, int8_t len)
 void settings_menu(){
 	/* If SW_1 is pressed during startup - Show SETTINGS and allow to release button. */
 	if (HAL_GPIO_ReadPin (GPIOB, SW_1_Pin) == 1){
-		char str[20];
+		char str[32];
 		memset(&str, '\0', strlen(str));
 		if((flash_values.screen_rotation == 0) || (flash_values.screen_rotation == 2)){
 			sprintf(str, "fw: %d.%d.%d     hw: %d", fw_version_major,fw_version_minor, fw_version_patch, get_hw_version());
@@ -626,7 +627,7 @@ void settings_menu(){
 					((double*)&flash_values)[menu_cursor_position] = (float)old_value + (float)(TIM2->CNT - 1000.0) / 2.0 - (float)menu_cursor_position;
 				}
 
-				if ((menu_cursor_position == 5) || (menu_cursor_position == 8) || (menu_cursor_position == 11) || (menu_cursor_position == 12) || (menu_cursor_position == 13)){
+				if ((menu_cursor_position == 5) || (menu_cursor_position == 8) || (menu_cursor_position == 11) || (menu_cursor_position == 12) || (menu_cursor_position == 13) || (menu_cursor_position == 20)){
 					((double*)&flash_values)[menu_cursor_position] = fmod(round(fmod(fabs(((double*)&flash_values)[menu_cursor_position]), 2)), 2);
 				}
 				else if (menu_cursor_position == 9){
@@ -1415,7 +1416,7 @@ int main(void)
 
 	/* initialize moving average functions */
 	Moving_Average_Init(&thermocouple_temperature_filter_struct,2);
-	Moving_Average_Init(&thermocouple_temperature_filtered_filter_struct,30);
+	Moving_Average_Init(&thermocouple_temperature_filtered_filter_struct,50);
 	Moving_Average_Init(&requested_power_filtered_filter_struct,20);
 	Moving_Average_Init(&mcu_temperature_filter_struct,100);
 	Moving_Average_Init(&input_voltage_filterStruct,25);
@@ -1461,7 +1462,7 @@ int main(void)
 	PID_SetOutputLimits(&TPID, 0, PID_MAX_OUTPUT); 			// Set max and min output limit
 	PID_SetILimits(&TPID, 0, 0);         					// Set max and min I limit
 	PID_SetIminError(&TPID,PID_ADD_I_MIN_ERROR);
-	PID_SetNegativeErrorIgainMult(&TPID, PID_NEGATIVE_ERROR_I_GAIN_MULTIPLIER);
+	PID_SetNegativeErrorIgainMult(&TPID, PID_NEG_ERROR_I_MULT, PID_NEG_ERROR_I_BIAS); // Set un-symmetric I gain parameters
 
 	/* Init and fill filter structures with initial values */
 	for (int i = 0; i<200;i++){
@@ -1587,7 +1588,7 @@ int main(void)
 		/* PID Tuning manual control */
 		#ifdef PID_TUNING
 		custom_temperature_on = 1;
-		PID_SetTunings(&TPID, Kp_tuning, Ki_tuning, Kd_tuning/10.0);
+		PID_SetTunings(&TPID, Kp_tuning, Ki_tuning, Kd_tuning/100.0);
 		PID_SetILimits(&TPID, -PID_MAX_I_LIMIT_tuning, PID_MAX_I_LIMIT_tuning); 	// Set max and min I limit
 		sensor_values.set_temperature = temperature_tuning;
 		#endif
