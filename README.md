@@ -79,6 +79,9 @@ A 3D view (from and back) of the AxxSolder PCB is generated with KiCad and shown
 # Software Version History and Hardware Compatibility
 | Version | Date  | Hardware Compatibility |
 |---------|------|----------------------|
+|[v3.3.1](https://github.com/AxxAxx/AxxSolder/releases/tag/v3.3.1)|Jan 18, 2025|V3.*|
+|[v3.3.0](https://github.com/AxxAxx/AxxSolder/releases/tag/v3.3.0)|Jan 04, 2025|V3.*|
+|[v3.2.5](https://github.com/AxxAxx/AxxSolder/releases/tag/v3.2.5)|Jan 02, 2025|V3.*|
 |[v3.2.4](https://github.com/AxxAxx/AxxSolder/releases/tag/v3.2.4)|Dec 26, 2024|V3.*|
 |[v3.2.3](https://github.com/AxxAxx/AxxSolder/releases/tag/v3.2.3)|Dec 05, 2024|V3.*|
 |[v3.2.2](https://github.com/AxxAxx/AxxSolder/releases/tag/v3.2.2)|Nov 15, 2024|V3.*|
@@ -115,7 +118,7 @@ The connections from the handle to the PCB through the Hirose RPC1-12RB-6P(71) c
 ![AxxSolder_portable](./photos/Portable_connections.jpg)
 
 # Recommended power supply for tip grounding
-A well-suited power supply with isolated output (SELV) is the Meanwell LRS-150-24. It is rated for 156 W at 24 V. By using a power supply with isolated outputs (floating negative terminal) the protective earth connector on AxxSolder can be connected directly to mains earth thus keeping the tip of the soldering iron at earth ground potential. There is a 1A fuse after the earth terminal in paralell with a 1M resistor on the AxxSolder.  
+In order to be able to ground the tip of the soldering iron the user MUST use a power supply with a floating output (SELV) and connect protective earth to the ground terminal on AxxSolder. No other devices should share this DC power other than AxxSolder itself. A well-suited power supply with floating output (SELV) is the Meanwell LRS-150-24. It is rated for 156 W at 24 V. By using this kind of power supply, AxxSolder can be connected directly its DC output and to mains earth thus keeping the tip of the soldering iron at earth ground potential. There is a 1A fuse after the earth terminal in paralell with a 1M resistor on the AxxSolder.  
 A printable cover protecting the terminals of the for LRS-150-24 can be found under [/CAD](https://github.com/AxxAxx/AxxSolder/tree/main/CAD).  
 ![LRS-150-24](./photos/LRS-150-24.jpg)
 Another suitable power supply is the Meanwell XLG-150-24 which has a slightly different form factor and is fully enclosed.
@@ -190,9 +193,10 @@ To access the user settings the user holds down the encoder button at start-up. 
 |Temp cal 350 °C|Actual temperature at 350 °C|deg C|350|
 |Temp cal 400 °C|Actual temperature at 400 °C|deg C|400|
 |Temp cal 450 °C|Actual temperature at 450 °C|deg C|450|
-|Serial debug print|Print debug over serial|ON/OFF|OFF|
+|Serial DEBUG|Print debug over serial|ON/OFF|OFF|
 |Displayed temp filter|Moving average filter length|Lenght|5|
 |Startup temp is previous temp|Startup temp is previous used temp|ON/OFF|OFF|
+|3-button mode|Use 3-button mode|ON/OFF|OFF|
 |-Load Default-|Load default parameters|N/A|N/A|
 |-Save and Reboot-|Exit and Save|N/A|N/A|
 |-Exit no Save-|Exit without Save|N/A|N/A|
